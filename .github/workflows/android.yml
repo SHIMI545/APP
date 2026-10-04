@@ -5,6 +5,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: aureon-android-release
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
