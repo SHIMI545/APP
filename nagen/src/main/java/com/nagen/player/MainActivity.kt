@@ -23,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -247,6 +248,7 @@ private fun NagenApp(
 
     LaunchedEffect(settings) {
         lightMode = settings.firstOrNull { it.key == "theme" }?.value == "light"
+        libraryTab = settings.firstOrNull { it.key == "library_default_tab" }?.value?.toIntOrNull()?.coerceIn(0, 4) ?: libraryTab
     }
 
     val current = tracks.firstOrNull { it.uri == currentUri }
@@ -1024,15 +1026,17 @@ private fun SheetRow(label: String, value: String) {
 
 @Composable
 private fun Artwork(uri: String, modifier: Modifier) {
+    val context = LocalContext.current
     var bitmap by remember(uri) { mutableStateOf<android.graphics.Bitmap?>(null) }
     LaunchedEffect(uri) {
         bitmap = runCatching {
-            val input = android.app.ApplicationProviderAccessor.open(uri)
-            input.use { BitmapFactory.decodeStream(it) }
+            context.contentResolver.openInputStream(Uri.parse(uri)).use { input ->
+                if (input == null) null else BitmapFactory.decodeStream(input)
+            }
         }.getOrNull()
     }
     if (bitmap != null) {
-        Image(bitmap!!.asImageBitmap(), null, modifier = modifier, contentScale = ContentScale.Crop)
+        Image(bitmap!!.asImageBitmap(), null, modifier = modifier.clip(RoundedCornerShape(16.dp)), contentScale = ContentScale.Crop)
     } else {
         Box(
             modifier.clip(RoundedCornerShape(16.dp)).background(
@@ -1041,12 +1045,6 @@ private fun Artwork(uri: String, modifier: Modifier) {
             contentAlignment = Alignment.Center
         ) { Icon(Icons.Default.MusicNote, null, tint = Gold, modifier = Modifier.size(34.dp)) }
     }
-}
-
-private object ApplicationProviderAccessor {
-    private var resolverProvider: (() -> android.content.ContentResolver)? = null
-    fun set(provider: () -> android.content.ContentResolver) { resolverProvider = provider }
-    fun open(uri: String): java.io.InputStream? = resolverProvider?.invoke()?.openInputStream(Uri.parse(uri))
 }
 
 private fun formatTime(ms: Long): String {
