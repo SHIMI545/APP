@@ -5,6 +5,5 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:statusBarColor">#08090D</item>
         <item name="android:navigationBarColor">#08090D</item>
-        <item name="android:forceRTL">true</item>
     </style>
 </resources>
