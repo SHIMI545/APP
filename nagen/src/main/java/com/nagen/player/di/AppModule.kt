@@ -13,7 +13,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
     @Provides @Singleton fun db(@ApplicationContext context:Context):NagenDatabase =
-        Room.databaseBuilder(context,NagenDatabase::class.java,"nagen.db").build()
+        Room.databaseBuilder(context,NagenDatabase::class.java,"nagan_v2.db").fallbackToDestructiveMigration().build()
     @Provides fun tracks(db:NagenDatabase)=db.tracks()
     @Provides fun playlists(db:NagenDatabase)=db.playlists()
     @Provides fun queues(db:NagenDatabase)=db.queues()
