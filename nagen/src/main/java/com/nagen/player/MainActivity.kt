@@ -173,7 +173,9 @@ class MainActivity : ComponentActivity() {
     private fun loadQueue(queue: QueueEntity, vm: PlayerViewModel) {
         val all = vm.tracks.value
         val type = object : com.google.gson.reflect.TypeToken<List<String>>() {}.type
-        val uris: List<String> = runCatching { com.google.gson.Gson().fromJson(queue.orderJson, type) }.getOrDefault(emptyList())
+        val uris: List<String> = runCatching {
+            com.google.gson.Gson().fromJson<List<String>>(queue.orderJson, type) ?: emptyList()
+        }.getOrDefault(emptyList())
         val tracks = uris.mapNotNull { u -> all.firstOrNull { it.uri == u } }
         if (tracks.isNotEmpty()) playList(tracks, queue.currentIndex.coerceIn(tracks.indices), vm)
         controller?.shuffleModeEnabled = queue.shuffle
@@ -485,6 +487,15 @@ private fun TopHeader(
 }
 
 @Composable
+private fun Section(title: String, content: @Composable () -> Unit) {
+    Column {
+        Text(title, color = Gold, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+        Spacer(Modifier.height(7.dp))
+        content()
+    }
+}
+
+@Composable
 private fun HomeScreen(
     tracks: List<TrackEntity>,
     favorites: List<TrackEntity>,
@@ -687,7 +698,7 @@ private fun SmartStrip(
     Column {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(title, fontSize = 19.sp, fontWeight = FontWeight.SemiBold, Modifier.weight(1f))
-            Text("${items.size}", color = Muted, fontSize = 12.sp)
+            Text(text = items.size.toString(), color = Muted, fontSize = 12.sp)
         }
         Spacer(Modifier.height(9.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -894,6 +905,7 @@ private fun MiniPlayer(current: TrackEntity, playing: Boolean, onOpen: () -> Uni
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FullPlayer(
     track: TrackEntity,
