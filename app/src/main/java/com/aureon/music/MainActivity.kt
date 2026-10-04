@@ -144,6 +144,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) scanDevice()
+    }
+
     private val folderPicker = registerForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
     ) { uri ->
@@ -222,6 +228,7 @@ class MainActivity : ComponentActivity() {
                 queueVisible = queueVisible,
                 playlistPickerTrack = playlistPickerTrack,
                 createPlaylistVisible = createPlaylistVisible,
+                createPlaylistForTrack = createPlaylistForTrack,
                 playlistDetails = playlistDetails,
                 onImportFiles = { filePicker.launch(arrayOf("audio/*")) },
                 onImportFolder = { folderPicker.launch(null) },
@@ -271,24 +278,12 @@ class MainActivity : ComponentActivity() {
         }
 
     private fun requestAudioPermission() {
-        if (Build.VERSION.SDK_INT >= 33) {
-            if (!hasAudioPermission()) requestPermissions(arrayOf(Manifest.permission.READ_MEDIA_AUDIO), 10)
-            else scanDevice()
+        val permission = if (Build.VERSION.SDK_INT >= 33) {
+            Manifest.permission.READ_MEDIA_AUDIO
         } else {
-            if (!hasAudioPermission()) requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 10)
-            else scanDevice()
+            Manifest.permission.READ_EXTERNAL_STORAGE
         }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 10 && grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
-            scanDevice()
-        }
+        if (!hasAudioPermission()) permissionLauncher.launch(permission) else scanDevice()
     }
 
     private fun restoreState() {
@@ -507,6 +502,7 @@ fun AureonApp(
     queueVisible: Boolean,
     playlistPickerTrack: Track?,
     createPlaylistVisible: Boolean,
+    createPlaylistForTrack: Track?,
     playlistDetails: Playlist?,
     onImportFiles: () -> Unit,
     onImportFolder: () -> Unit,
