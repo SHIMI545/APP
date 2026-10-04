@@ -335,7 +335,9 @@ private fun NagenApp(
                                 onTab = { libraryTab = it },
                                 onPlay = onPlay,
                                 onFavorite = vm::toggleFavorite,
-                                onPlaylist = { playlistDialogTrack = it }
+                                onPlaylist = { playlistDialogTrack = it },
+                                playlists = playlists,
+                                onOpenPlaylist = { selectedPlaylist = it }
                             )
                             Nav.QUEUES -> QueuesScreen(
                                 queues = queues,
