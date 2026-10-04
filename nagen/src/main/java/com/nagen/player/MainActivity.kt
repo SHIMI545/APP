@@ -574,7 +574,9 @@ private fun LibraryScreen(
     onTab: (Int) -> Unit,
     onPlay: (List<TrackEntity>, Int) -> Unit,
     onFavorite: (TrackEntity) -> Unit,
-    onPlaylist: (TrackEntity) -> Unit
+    onPlaylist: (TrackEntity) -> Unit,
+    playlists: List<PlaylistEntity>,
+    onOpenPlaylist: (PlaylistEntity) -> Unit
 ) {
     val labels = listOf("שירים","אלבומים","אמנים","תיקיות","רשימות")
     Column(Modifier.fillMaxSize()) {
@@ -601,6 +603,58 @@ private fun LibraryScreen(
                 onPlay = { group -> onPlay(group, 0) }
             )
             else -> Text("הרשימות המלאות מופיעות גם במסך התורים ובמסך בשבילך.", Modifier.padding(18.dp), color = Muted)
+        }
+    }
+}
+
+@Composable
+private fun PlaylistBrowser(
+    playlists: List<PlaylistEntity>,
+    onOpen: (PlaylistEntity) -> Unit
+) {
+    LazyColumn(
+        contentPadding = PaddingValues(18.dp, 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(playlists, key = { it.name }) { playlist ->
+            val smart = playlist.smartType.isNotBlank()
+            Surface(
+                Modifier.fillMaxWidth().clickable { onOpen(playlist) },
+                color = Panel,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        Modifier.size(48.dp)
+                            .clip(RoundedCornerShape(13.dp))
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(Color(0xFF303442), Color(0xFF151820))
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            if (smart) Icons.Default.AutoAwesome else Icons.Default.QueueMusic,
+                            null,
+                            tint = Gold
+                        )
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(playlist.name, fontWeight = FontWeight.Medium)
+                        Text(
+                            if (smart) "רשימה חכמה" else "רשימה רגילה",
+                            color = Muted,
+                            fontSize = 11.sp
+                        )
+                    }
+                    Icon(Icons.Default.ChevronLeft, null, tint = Muted)
+                }
+            }
         }
     }
 }
@@ -697,7 +751,7 @@ private fun SmartStrip(
 ) {
     Column {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(title, fontSize = 19.sp, fontWeight = FontWeight.SemiBold, Modifier.weight(1f))
+            Text(title, modifier = Modifier.weight(1f), fontSize = 19.sp, fontWeight = FontWeight.SemiBold)
             Text(text = items.size.toString(), color = Muted, fontSize = 12.sp)
         }
         Spacer(Modifier.height(9.dp))
