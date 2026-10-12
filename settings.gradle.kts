@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 rootProject.name = "AureonMusic"
 include(":app")
 include(":nagen")
+include(":familyfinance")
