@@ -24,6 +24,13 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
+      - name: Bundle offline PDF and Excel parsers
+        shell: bash
+        run: |
+          mkdir -p familyfinance/src/main/assets/vendor
+          curl --fail --location --retry 3 --retry-delay 2 https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js -o familyfinance/src/main/assets/vendor/xlsx.full.min.js
+          curl --fail --location --retry 3 --retry-delay 2 https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js -o familyfinance/src/main/assets/vendor/pdf.min.js
+          curl --fail --location --retry 3 --retry-delay 2 https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js -o familyfinance/src/main/assets/vendor/pdf.worker.min.js
       - name: Build Family Finance release APK
         id: build
         continue-on-error: true
