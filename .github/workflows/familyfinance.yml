@@ -10,7 +10,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: familyfinance-android-release
+  group: familyfinance-android-release-v2
   cancel-in-progress: true
 jobs:
   build:
